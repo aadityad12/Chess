@@ -1,15 +1,15 @@
 :root {
-  --bg-1: #eef2f5;
-  --bg-2: #bfd0d9;
-  --panel: rgba(250, 252, 255, 0.85);
-  --ink: #1f2c33;
-  --accent: #d95d39;
-  --board-light: #f7ecd6;
-  --board-dark: #6f5442;
-  --board-edge: #2f2019;
-  --select: #f4be37;
-  --move: #4ca36f;
-  --danger: #c73627;
+  --bg-1: #f7f7f7;
+  --bg-2: #d9d9d9;
+  --panel: rgba(255, 255, 255, 0.9);
+  --ink: #111111;
+  --accent: #111111;
+  --board-light: #f1f1f1;
+  --board-dark: #666666;
+  --board-edge: #111111;
+  --select: #111111;
+  --move: #2b2b2b;
+  --danger: #000000;
 }
 
 * {
@@ -117,7 +117,6 @@ button:hover {
 }
 
 .board-stage {
-  perspective: 1300px;
   margin-top: 1.2rem;
   display: grid;
   place-items: center;
@@ -126,13 +125,10 @@ button:hover {
 .board-shell {
   width: min(92vw, 680px);
   aspect-ratio: 1;
-  padding: 0.8rem;
-  border-radius: 20px;
-  background: linear-gradient(160deg, #4f3a2c, #2f231c);
-  box-shadow:
-    0 22px 30px rgba(20, 11, 8, 0.35),
-    inset 0 0 0 2px rgba(255, 255, 255, 0.09);
-  transform-style: preserve-3d;
+  padding: 0.4rem;
+  border-radius: 8px;
+  background: var(--board-edge);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .board {
@@ -140,17 +136,15 @@ button:hover {
   height: 100%;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  border-radius: 8px;
+  grid-template-rows: repeat(8, 1fr);
+  border-radius: 4px;
   overflow: hidden;
-  transform: rotateX(57deg);
-  transform-origin: center 72%;
-  transform-style: preserve-3d;
-  transition: transform 320ms ease;
-  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 260ms ease;
+  border: 1px solid #222;
 }
 
 .board.flipped {
-  transform: rotateX(57deg) rotateZ(180deg);
+  transform: rotateZ(180deg);
 }
 
 .square {
@@ -162,7 +156,7 @@ button:hover {
   position: relative;
   font-size: clamp(1.5rem, 4.2vw, 2.4rem);
   cursor: pointer;
-  transform-style: preserve-3d;
+  transition: background-color 120ms ease;
 }
 
 .square.light {
@@ -202,25 +196,40 @@ button:hover {
 }
 
 .piece {
-  transform: translateZ(14px);
-  text-shadow:
-    0 7px 5px rgba(0, 0, 0, 0.38),
-    0 1px 0 rgba(255, 255, 255, 0.65);
-  transition: transform 160ms ease;
+  transition: transform 160ms ease, filter 160ms ease;
   user-select: none;
   pointer-events: none;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.35));
+}
+
+.piece-white {
+  color: #ffffff;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+.piece-black {
+  color: #111111;
+  text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff;
 }
 
 .board.flipped .piece {
-  transform: rotateZ(180deg) translateZ(14px);
+  transform: rotateZ(180deg);
 }
 
 .square:hover .piece {
-  transform: translateZ(18px) scale(1.04);
+  transform: scale(1.06);
 }
 
 .board.flipped .square:hover .piece {
-  transform: rotateZ(180deg) translateZ(18px) scale(1.04);
+  transform: rotateZ(180deg) scale(1.06);
 }
 
 .legend {
@@ -247,11 +256,6 @@ kbd {
   }
 
   .board {
-    transform-origin: center 80%;
-    transform: rotateX(52deg);
-  }
-
-  .board.flipped {
-    transform: rotateX(52deg) rotateZ(180deg);
+    border-radius: 2px;
   }
 }

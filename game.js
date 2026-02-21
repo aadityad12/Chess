@@ -764,7 +764,7 @@
         const piece = state.position.board[row][col];
         if (piece) {
           const pieceEl = document.createElement("span");
-          pieceEl.className = "piece";
+          pieceEl.className = `piece ${piece[0] === "w" ? "piece-white" : "piece-black"}`;
           pieceEl.textContent = PIECE_UNICODE[piece];
           square.appendChild(pieceEl);
         }
@@ -787,12 +787,12 @@
     const dy = fromRect.top - toRect.top;
     pieceEl.animate(
       [
-        { transform: `translate(${dx}px, ${dy}px) translateZ(26px) scale(1.12)` },
-        { transform: "translate(0, 0) translateZ(24px) scale(1.03)", offset: 0.72 },
-        { transform: "translate(0, 0) translateZ(14px) scale(1)" },
+        { transform: `translate(${dx}px, ${dy}px) scale(1.08)` },
+        { transform: "translate(0, 0) scale(1.03)", offset: 0.72 },
+        { transform: "translate(0, 0) scale(1)" },
       ],
       {
-        duration: 300,
+        duration: 220,
         easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
       }
     );
