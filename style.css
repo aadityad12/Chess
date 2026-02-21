@@ -92,6 +92,30 @@ button:hover {
   gap: 0.15rem;
 }
 
+.difficulty-meta {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+#difficulty-info {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.elo-table summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.elo-table ol {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
 .board-stage {
   perspective: 1300px;
   margin-top: 1.2rem;

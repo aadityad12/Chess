@@ -9,7 +9,7 @@ A browser-based chess game with:
 
 ### Option 1 (recommended): Python static server
 ```bash
-cd /Users/aadityad/Desktop/Aaditya/Personal/ExtraCuricular/Projects
+cd /Users/aadityad/Desktop/Aaditya/Personal/ExtraCuricular/Projects/chess-game
 python3 -m http.server 5173
 ```
 Open: `http://127.0.0.1:5173`
@@ -27,6 +27,7 @@ Open `index.html` in your browser.
 - Rules implemented: legal moves, check, checkmate, stalemate, castling, en passant
 - Pawn promotion currently auto-promotes to a queen
 - Bot strength varies across 10 levels using minimax + randomness profiles
+- UI includes estimated Elo ranges for each difficulty level (approximate)
 - Board flips automatically when you play as black
 
 ## Project Files

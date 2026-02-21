@@ -20,3 +20,6 @@ Original prompt: help me create a chess board game
 - Syntax check passed: `node --check game.js`.
 - Tried running the required Playwright client script, but environment has no npm network access (`ENOTFOUND registry.npmjs.org`) and no preinstalled `playwright` package.
 - Started local server successfully (port 5173) and prepared Playwright command format, but full browser automation could not run due to missing Playwright dependency.
+- Updated startup behavior: game now loads in idle state and does not display "Game started." until New Game is clicked.
+- Added estimated Elo mapping UI for all 10 bot levels, including current selected level estimate.
+- Updated README run path to start server from `chess-game/`.

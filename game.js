@@ -5,6 +5,8 @@
   const sideSelect = document.getElementById("player-side");
   const diffSelect = document.getElementById("difficulty");
   const newGameBtn = document.getElementById("new-game-btn");
+  const difficultyInfoEl = document.getElementById("difficulty-info");
+  const eloComparisonEl = document.getElementById("elo-comparison");
 
   const PIECE_UNICODE = {
     wp: "♙",
@@ -31,16 +33,16 @@
   };
 
   const DIFFICULTY = [
-    { label: "1 - Beginner", depth: 0, topPool: 999, blunder: 0.65 },
-    { label: "2 - Easy", depth: 1, topPool: 8, blunder: 0.5 },
-    { label: "3 - Easy+", depth: 1, topPool: 5, blunder: 0.36 },
-    { label: "4 - Medium-", depth: 1, topPool: 3, blunder: 0.2 },
-    { label: "5 - Medium", depth: 2, topPool: 7, blunder: 0.22 },
-    { label: "6 - Medium+", depth: 2, topPool: 4, blunder: 0.12 },
-    { label: "7 - Hard-", depth: 2, topPool: 2, blunder: 0.08 },
-    { label: "8 - Hard", depth: 3, topPool: 3, blunder: 0.06 },
-    { label: "9 - Expert", depth: 3, topPool: 2, blunder: 0.02 },
-    { label: "10 - Master", depth: 3, topPool: 1, blunder: 0 },
+    { label: "1 - Beginner", depth: 0, topPool: 999, blunder: 0.65, elo: "400-550" },
+    { label: "2 - Easy", depth: 1, topPool: 8, blunder: 0.5, elo: "550-700" },
+    { label: "3 - Easy+", depth: 1, topPool: 5, blunder: 0.36, elo: "700-850" },
+    { label: "4 - Medium-", depth: 1, topPool: 3, blunder: 0.2, elo: "850-1000" },
+    { label: "5 - Medium", depth: 2, topPool: 7, blunder: 0.22, elo: "1000-1150" },
+    { label: "6 - Medium+", depth: 2, topPool: 4, blunder: 0.12, elo: "1150-1300" },
+    { label: "7 - Hard-", depth: 2, topPool: 2, blunder: 0.08, elo: "1300-1450" },
+    { label: "8 - Hard", depth: 3, topPool: 3, blunder: 0.06, elo: "1450-1600" },
+    { label: "9 - Expert", depth: 3, topPool: 2, blunder: 0.02, elo: "1600-1800" },
+    { label: "10 - Master", depth: 3, topPool: 1, blunder: 0, elo: "1800-2000" },
   ];
 
   const KNIGHT_DELTAS = [
@@ -72,6 +74,7 @@
     humanSide: "w",
     botSide: "b",
     difficulty: 5,
+    hasStarted: false,
     gameOver: false,
     message: "",
     detail: "",
@@ -84,8 +87,9 @@
   let rafLastTs = null;
 
   setupDifficultySelect();
+  renderDifficultyComparison();
   wireEvents();
-  startNewGame();
+  resetToIdle();
   requestAnimationFrame(loop);
 
   function setupDifficultySelect() {
@@ -104,6 +108,7 @@
     newGameBtn.addEventListener("click", startNewGame);
     diffSelect.addEventListener("change", () => {
       state.difficulty = Number(diffSelect.value);
+      updateDifficultyInfo();
       updateStatusText();
     });
 
@@ -130,6 +135,7 @@
     state.position = createInitialPosition();
     state.selected = null;
     state.legalTargets = [];
+    state.hasStarted = true;
     state.gameOver = false;
     state.message = "Game started.";
     state.detail = "";
@@ -141,6 +147,38 @@
     renderBoard();
     updateStatusText();
     scheduleBotIfNeeded(220);
+  }
+
+  function resetToIdle() {
+    state.position = createInitialPosition();
+    state.selected = null;
+    state.legalTargets = [];
+    state.hasStarted = false;
+    state.gameOver = false;
+    state.message = "Press New Game to start.";
+    state.detail = "Choose side and difficulty first.";
+    state.lastMove = null;
+    state.pendingBotAt = null;
+    state.inCheck = { w: false, b: false };
+    state.difficulty = Number(diffSelect.value);
+    boardEl.classList.remove("flipped");
+    renderBoard();
+    updateDifficultyInfo();
+    updateStatusText();
+  }
+
+  function renderDifficultyComparison() {
+    eloComparisonEl.replaceChildren();
+    DIFFICULTY.forEach((level, idx) => {
+      const item = document.createElement("li");
+      item.textContent = `Level ${idx + 1}: ${level.elo} Elo (estimated)`;
+      eloComparisonEl.appendChild(item);
+    });
+  }
+
+  function updateDifficultyInfo() {
+    const level = DIFFICULTY[Math.max(0, Math.min(9, state.difficulty - 1))];
+    difficultyInfoEl.textContent = `Level ${state.difficulty} estimate: ${level.elo} Elo`;
   }
 
   function createInitialPosition() {
@@ -164,7 +202,12 @@
   }
 
   function onSquareClick(row, col) {
-    if (state.gameOver || !state.position || state.position.turn !== state.humanSide) {
+    if (
+      !state.hasStarted ||
+      state.gameOver ||
+      !state.position ||
+      state.position.turn !== state.humanSide
+    ) {
       return;
     }
     const piece = state.position.board[row][col];
@@ -234,7 +277,7 @@
   }
 
   function scheduleBotIfNeeded(delayMs) {
-    if (!state.gameOver && state.position.turn === state.botSide) {
+    if (state.hasStarted && !state.gameOver && state.position.turn === state.botSide) {
       state.pendingBotAt = state.realtime + delayMs;
       state.message = "Bot is thinking...";
       updateStatusText();
@@ -765,6 +808,12 @@
   }
 
   function updateStatusText() {
+    if (!state.hasStarted) {
+      statusEl.textContent = "Press New Game to start.";
+      detailEl.textContent = `Current level: ${state.difficulty}. Choose side and start when ready.`;
+      return;
+    }
+
     const turnText = state.position.turn === "w" ? "White" : "Black";
     const humanText = state.humanSide === "w" ? "White" : "Black";
 
@@ -805,7 +854,8 @@
     const payload = {
       coordinate_system:
         "row 0 is top (black home rank), row 7 bottom (white home rank); col 0 is left from white's view",
-      mode: state.gameOver ? "game_over" : "playing",
+      mode: state.hasStarted ? (state.gameOver ? "game_over" : "playing") : "idle",
+      has_started: state.hasStarted,
       human_side: state.humanSide,
       bot_side: state.botSide,
       turn: state.position.turn,
