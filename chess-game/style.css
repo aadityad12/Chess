@@ -1,0 +1,233 @@
+:root {
+  --bg-1: #eef2f5;
+  --bg-2: #bfd0d9;
+  --panel: rgba(250, 252, 255, 0.85);
+  --ink: #1f2c33;
+  --accent: #d95d39;
+  --board-light: #f7ecd6;
+  --board-dark: #6f5442;
+  --board-edge: #2f2019;
+  --select: #f4be37;
+  --move: #4ca36f;
+  --danger: #c73627;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, #ffffff 0%, transparent 35%),
+    linear-gradient(130deg, var(--bg-1), var(--bg-2));
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 24px rgba(36, 57, 64, 0.12);
+}
+
+.panel h1 {
+  margin: 0;
+  font-size: 1.7rem;
+}
+
+.panel p {
+  margin: 0.35rem 0 0.9rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: end;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+select,
+button {
+  border: 1px solid #9db3bf;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+}
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 140ms ease, filter 140ms ease;
+}
+
+button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.status-wrap {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.board-stage {
+  perspective: 1300px;
+  margin-top: 1.2rem;
+  display: grid;
+  place-items: center;
+}
+
+.board-shell {
+  width: min(92vw, 680px);
+  aspect-ratio: 1;
+  padding: 0.8rem;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #4f3a2c, #2f231c);
+  box-shadow:
+    0 22px 30px rgba(20, 11, 8, 0.35),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.09);
+  transform-style: preserve-3d;
+}
+
+.board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  border-radius: 8px;
+  overflow: hidden;
+  transform: rotateX(57deg);
+  transform-origin: center 72%;
+  transform-style: preserve-3d;
+  transition: transform 320ms ease;
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+}
+
+.board.flipped {
+  transform: rotateX(57deg) rotateZ(180deg);
+}
+
+.square {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  position: relative;
+  font-size: clamp(1.5rem, 4.2vw, 2.4rem);
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+
+.square.light {
+  background: var(--board-light);
+}
+
+.square.dark {
+  background: var(--board-dark);
+}
+
+.square.selected::after,
+.square.target::after,
+.square.last-from::before,
+.square.last-to::before,
+.square.in-check::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 10px;
+}
+
+.square.selected::after {
+  border: 3px solid var(--select);
+}
+
+.square.target::after {
+  border: 3px dashed var(--move);
+}
+
+.square.last-from::before,
+.square.last-to::before {
+  background: color-mix(in oklab, var(--move), transparent 72%);
+}
+
+.square.in-check::before {
+  background: color-mix(in oklab, var(--danger), transparent 58%);
+}
+
+.piece {
+  transform: translateZ(14px);
+  text-shadow:
+    0 7px 5px rgba(0, 0, 0, 0.38),
+    0 1px 0 rgba(255, 255, 255, 0.65);
+  transition: transform 160ms ease;
+  user-select: none;
+  pointer-events: none;
+}
+
+.board.flipped .piece {
+  transform: rotateZ(180deg) translateZ(14px);
+}
+
+.square:hover .piece {
+  transform: translateZ(18px) scale(1.04);
+}
+
+.board.flipped .square:hover .piece {
+  transform: rotateZ(180deg) translateZ(18px) scale(1.04);
+}
+
+.legend {
+  margin-top: 0.8rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+kdb,
+kbd {
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #7b8f9b;
+  background: #eef6fa;
+}
+
+@media (max-width: 760px) {
+  .app {
+    padding: 0.8rem;
+  }
+
+  .panel h1 {
+    font-size: 1.35rem;
+  }
+
+  .board {
+    transform-origin: center 80%;
+    transform: rotateX(52deg);
+  }
+
+  .board.flipped {
+    transform: rotateX(52deg) rotateZ(180deg);
+  }
+}

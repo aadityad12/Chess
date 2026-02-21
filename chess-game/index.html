@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Chess Arena</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="panel">
+        <h1>3D Chess Arena</h1>
+        <p>Pick your side, choose bot strength, and play.</p>
+        <div class="controls">
+          <label>
+            Start as
+            <select id="player-side">
+              <option value="w">White</option>
+              <option value="b">Black</option>
+              <option value="random" selected>Random</option>
+            </select>
+          </label>
+          <label>
+            Bot difficulty
+            <select id="difficulty"></select>
+          </label>
+          <button id="new-game-btn" type="button">New Game</button>
+        </div>
+        <div class="status-wrap">
+          <strong id="status">Press New Game to start.</strong>
+          <span id="detail"></span>
+        </div>
+      </header>
+
+      <section class="board-stage">
+        <div id="board-shell" class="board-shell">
+          <div id="board" class="board" aria-label="Chess board"></div>
+        </div>
+      </section>
+
+      <footer class="legend">
+        <p>Controls: click piece then destination. Press <kbd>f</kbd> for fullscreen.</p>
+      </footer>
+    </main>
+
+    <script src="./game.js"></script>
+  </body>
+</html>
