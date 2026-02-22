@@ -33,16 +33,16 @@
   };
 
   const DIFFICULTY = [
-    { label: "1 - Beginner", depth: 0, topPool: 999, blunder: 0.65, elo: "400-550" },
-    { label: "2 - Easy", depth: 1, topPool: 8, blunder: 0.5, elo: "550-700" },
-    { label: "3 - Easy+", depth: 1, topPool: 5, blunder: 0.36, elo: "700-850" },
-    { label: "4 - Medium-", depth: 1, topPool: 3, blunder: 0.2, elo: "850-1000" },
-    { label: "5 - Medium", depth: 2, topPool: 7, blunder: 0.22, elo: "1000-1150" },
-    { label: "6 - Medium+", depth: 2, topPool: 4, blunder: 0.12, elo: "1150-1300" },
-    { label: "7 - Hard-", depth: 2, topPool: 2, blunder: 0.08, elo: "1300-1450" },
-    { label: "8 - Hard", depth: 3, topPool: 3, blunder: 0.06, elo: "1450-1600" },
-    { label: "9 - Expert", depth: 3, topPool: 2, blunder: 0.02, elo: "1600-1800" },
-    { label: "10 - Master", depth: 3, topPool: 1, blunder: 0, elo: "1800-2000" },
+    { label: "Very Easy", elo: 100, depth: 0, topPool: 999, blunder: 0.72 },
+    { label: "Easy", elo: 300, depth: 1, topPool: 10, blunder: 0.6 },
+    { label: "Beginner", elo: 500, depth: 1, topPool: 8, blunder: 0.5 },
+    { label: "Novice", elo: 700, depth: 1, topPool: 5, blunder: 0.36 },
+    { label: "Casual", elo: 900, depth: 1, topPool: 3, blunder: 0.24 },
+    { label: "Average Club", elo: 1100, depth: 2, topPool: 8, blunder: 0.2 },
+    { label: "Intermediate", elo: 1300, depth: 2, topPool: 5, blunder: 0.12 },
+    { label: "Advanced", elo: 1500, depth: 2, topPool: 2, blunder: 0.08 },
+    { label: "Expert", elo: 1700, depth: 3, topPool: 3, blunder: 0.03 },
+    { label: "Master", elo: 1900, depth: 3, topPool: 1, blunder: 0 },
   ];
 
   const KNIGHT_DELTAS = [
@@ -96,8 +96,8 @@
     DIFFICULTY.forEach((d, idx) => {
       const opt = document.createElement("option");
       opt.value = String(idx + 1);
-      opt.textContent = d.label;
-      if (idx === 4) {
+      opt.textContent = `${d.elo} Elo - ${d.label}`;
+      if (idx === 5) {
         opt.selected = true;
       }
       diffSelect.appendChild(opt);
@@ -169,16 +169,16 @@
 
   function renderDifficultyComparison() {
     eloComparisonEl.replaceChildren();
-    DIFFICULTY.forEach((level, idx) => {
+    DIFFICULTY.forEach((level) => {
       const item = document.createElement("li");
-      item.textContent = `Level ${idx + 1}: ${level.elo} Elo (estimated)`;
+      item.textContent = `${level.elo} Elo - ${level.label}`;
       eloComparisonEl.appendChild(item);
     });
   }
 
   function updateDifficultyInfo() {
     const level = DIFFICULTY[Math.max(0, Math.min(9, state.difficulty - 1))];
-    difficultyInfoEl.textContent = `Level ${state.difficulty} estimate: ${level.elo} Elo`;
+    difficultyInfoEl.textContent = `Selected: ${level.elo} Elo - ${level.label}`;
   }
 
   function createInitialPosition() {
@@ -808,9 +808,11 @@
   }
 
   function updateStatusText() {
+    const level = DIFFICULTY[Math.max(0, Math.min(9, state.difficulty - 1))];
+
     if (!state.hasStarted) {
       statusEl.textContent = "Press New Game to start.";
-      detailEl.textContent = `Current level: ${state.difficulty}. Choose side and start when ready.`;
+      detailEl.textContent = `Current bot: ${level.elo} Elo - ${level.label}. Choose side and start when ready.`;
       return;
     }
 
@@ -831,7 +833,7 @@
         ? " | Check"
         : "";
 
-    detailEl.textContent = `You: ${humanText} | Turn: ${turnText}${checkFlag} | Level ${state.difficulty}`;
+    detailEl.textContent = `You: ${humanText} | Turn: ${turnText}${checkFlag} | Bot: ${level.elo} Elo - ${level.label}`;
   }
 
   function toggleFullscreen() {

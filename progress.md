@@ -23,3 +23,5 @@ Original prompt: help me create a chess board game
 - Updated startup behavior: game now loads in idle state and does not display "Game started." until New Game is clicked.
 - Added estimated Elo mapping UI for all 10 bot levels, including current selected level estimate.
 - Updated README run path to start server from `chess-game/`.
+- Reworked difficulty display to Elo-first tiers (e.g., `100 Elo - Very Easy` through `1900 Elo - Master`).
+- Dropdown, status detail, and Elo comparison panel now use consistent Elo-name labels.
