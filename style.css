@@ -90,6 +90,10 @@ button:hover {
   background: #2f2f2f;
 }
 
+.is-hidden {
+  display: none;
+}
+
 .status-wrap {
   margin-top: 0.85rem;
   display: grid;

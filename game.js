@@ -165,6 +165,7 @@
     btn.textContent = "Forfeit";
     controlsEl.appendChild(btn);
     forfeitBtn = btn;
+    updateActionButtons();
   }
 
   function startNewGame() {
@@ -178,7 +179,7 @@
     state.legalTargets = [];
     state.hasStarted = true;
     state.gameOver = false;
-    state.message = "Game started.";
+    state.message = "";
     state.detail = "";
     state.lastMove = null;
     state.pendingBotAt = null;
@@ -197,7 +198,7 @@
     state.legalTargets = [];
     state.hasStarted = false;
     state.gameOver = false;
-    state.message = "Press New Game to start.";
+    state.message = "";
     state.detail = "Choose side and difficulty first.";
     state.lastMove = null;
     state.pendingBotAt = null;
@@ -242,6 +243,18 @@
     state.detail = "You forfeited. Press New Game for a rematch.";
     renderBoard();
     updateStatusText();
+  }
+
+  function updateActionButtons() {
+    if (!newGameBtn || !forfeitBtn) {
+      return;
+    }
+
+    const gameActive = state.hasStarted && !state.gameOver;
+    newGameBtn.hidden = gameActive;
+    forfeitBtn.hidden = !gameActive;
+    newGameBtn.classList.toggle("is-hidden", gameActive);
+    forfeitBtn.classList.toggle("is-hidden", !gameActive);
   }
 
   function createInitialPosition() {
@@ -494,7 +507,7 @@
   function scheduleBotIfNeeded(delayMs) {
     if (state.hasStarted && !state.gameOver && state.position.turn === state.botSide) {
       state.pendingBotAt = state.realtime + delayMs;
-      state.message = "Bot is thinking...";
+      state.message = "";
       updateStatusText();
     } else {
       state.pendingBotAt = null;
@@ -1027,6 +1040,7 @@
 
   function updateStatusText() {
     const level = DIFFICULTY[Math.max(0, Math.min(9, state.difficulty - 1))];
+    updateActionButtons();
 
     if (!state.hasStarted) {
       statusEl.textContent = "Press New Game to start.";
@@ -1043,7 +1057,12 @@
       return;
     }
 
-    statusEl.textContent = state.message || `${turnText} to move.`;
+    if (state.message) {
+      statusEl.textContent = state.message;
+    } else {
+      statusEl.textContent =
+        state.position.turn === state.humanSide ? "Your turn." : "Bot is thinking...";
+    }
 
     const checkFlag =
       (state.position.turn === "w" && state.inCheck.w) ||
@@ -1051,7 +1070,8 @@
         ? " | Check"
         : "";
 
-    detailEl.textContent = `You: ${humanText} | Turn: ${turnText}${checkFlag} | Bot: ${level.elo} Elo - ${level.label}`;
+    const turnOwner = state.position.turn === state.humanSide ? "You" : "Bot";
+    detailEl.textContent = `You: ${humanText} | Turn: ${turnOwner} (${turnText})${checkFlag} | Bot: ${level.elo} Elo - ${level.label}`;
   }
 
   function toggleFullscreen() {

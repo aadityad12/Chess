@@ -28,3 +28,6 @@ Original prompt: help me create a chess board game
 - Added a `Forfeit` button that immediately ends an active game and awards the win to the bot side by forfeit.
 - Added drag-and-drop move support for human turns: pick up piece, see valid targets while dragging, and only commit move on valid drop square.
 - Kept click-to-move behavior as fallback.
+- UI is now situational: `New Game` shows only before/after games, `Forfeit` shows only during active games.
+- Status line now explicitly reports action ownership (`Your turn.` vs `Bot is thinking...`) and detail includes whose turn it is.
+- Tightened control visibility: `Forfeit` now defaults to hidden in HTML and runtime uses `hidden` attribute plus class toggles.
