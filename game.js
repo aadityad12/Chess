@@ -84,6 +84,8 @@
     pendingBotAt: null,
     realtime: 0,
     inCheck: { w: false, b: false },
+    drag: null,
+    suppressClickUntil: 0,
   };
 
   let rafLastTs = null;
@@ -118,13 +120,31 @@
       updateStatusText();
     });
 
+    boardEl.addEventListener("pointerdown", (event) => {
+      const square = event.target.closest(".square");
+      if (!square) {
+        return;
+      }
+      if (event.pointerType === "mouse" && event.button !== 0) {
+        return;
+      }
+      onSquarePointerDown(Number(square.dataset.row), Number(square.dataset.col), event);
+    });
+
     boardEl.addEventListener("click", (event) => {
+      if (performance.now() < state.suppressClickUntil || state.drag) {
+        return;
+      }
       const square = event.target.closest(".square");
       if (!square) {
         return;
       }
       onSquareClick(Number(square.dataset.row), Number(square.dataset.col));
     });
+
+    window.addEventListener("pointermove", onGlobalPointerMove, { passive: false });
+    window.addEventListener("pointerup", onGlobalPointerUp, { passive: false });
+    window.addEventListener("pointercancel", onGlobalPointerCancel, { passive: false });
 
     window.addEventListener("keydown", (event) => {
       if (event.key.toLowerCase() === "f") {
@@ -147,6 +167,7 @@
   }
 
   function startNewGame() {
+    clearDragState();
     const selected = sideSelect.value;
     state.humanSide =
       selected === "random" ? (Math.random() > 0.5 ? "w" : "b") : selected;
@@ -169,6 +190,7 @@
   }
 
   function resetToIdle() {
+    clearDragState();
     state.position = createInitialPosition();
     state.selected = null;
     state.legalTargets = [];
@@ -210,6 +232,7 @@
     if (!state.hasStarted || state.gameOver) {
       return;
     }
+    clearDragState();
     state.selected = null;
     state.legalTargets = [];
     state.pendingBotAt = null;
@@ -241,6 +264,9 @@
   }
 
   function onSquareClick(row, col) {
+    if (state.drag) {
+      return;
+    }
     if (
       !state.hasStarted ||
       state.gameOver ||
@@ -271,6 +297,137 @@
       (m) => m.from.row === row && m.from.col === col
     );
     renderBoard();
+  }
+
+  function onSquarePointerDown(row, col, event) {
+    if (
+      !state.hasStarted ||
+      state.gameOver ||
+      !state.position ||
+      state.position.turn !== state.humanSide
+    ) {
+      return;
+    }
+
+    const piece = state.position.board[row][col];
+    if (!piece || piece[0] !== state.humanSide) {
+      return;
+    }
+
+    const legalFromSquare = generateLegalMoves(state.position, state.humanSide).filter(
+      (m) => m.from.row === row && m.from.col === col
+    );
+    if (!legalFromSquare.length) {
+      return;
+    }
+
+    state.selected = { row, col };
+    state.legalTargets = legalFromSquare;
+    renderBoard();
+
+    const ghost = createDragGhost(piece);
+    if (!ghost) {
+      return;
+    }
+
+    state.drag = {
+      pointerId: event.pointerId,
+      from: { row, col },
+      legalMoves: legalFromSquare,
+      ghostEl: ghost,
+    };
+    moveDragGhost(event.clientX, event.clientY);
+    const sourcePiece = getSquareElement(row, col)?.querySelector(".piece");
+    if (sourcePiece) {
+      sourcePiece.classList.add("drag-hidden");
+    }
+    state.suppressClickUntil = performance.now() + 250;
+    event.preventDefault();
+  }
+
+  function onGlobalPointerMove(event) {
+    if (!state.drag || event.pointerId !== state.drag.pointerId) {
+      return;
+    }
+    moveDragGhost(event.clientX, event.clientY);
+    event.preventDefault();
+  }
+
+  function onGlobalPointerUp(event) {
+    if (!state.drag || event.pointerId !== state.drag.pointerId) {
+      return;
+    }
+    completeDrag(event.clientX, event.clientY);
+    event.preventDefault();
+  }
+
+  function onGlobalPointerCancel(event) {
+    if (!state.drag || event.pointerId !== state.drag.pointerId) {
+      return;
+    }
+    clearDragState();
+    state.selected = null;
+    state.legalTargets = [];
+    renderBoard();
+    state.suppressClickUntil = performance.now() + 150;
+    event.preventDefault();
+  }
+
+  function createDragGhost(piece) {
+    const ghost = document.createElement("span");
+    ghost.className = `piece drag-ghost ${piece[0] === "w" ? "piece-white" : "piece-black"}`;
+    ghost.textContent = PIECE_UNICODE[piece];
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+
+  function moveDragGhost(clientX, clientY) {
+    if (!state.drag || !state.drag.ghostEl) {
+      return;
+    }
+    state.drag.ghostEl.style.left = `${clientX}px`;
+    state.drag.ghostEl.style.top = `${clientY}px`;
+  }
+
+  function completeDrag(clientX, clientY) {
+    const drag = state.drag;
+    if (!drag) {
+      return;
+    }
+
+    const dropSquare = getSquareFromPoint(clientX, clientY);
+    const move = dropSquare
+      ? drag.legalMoves.find((m) => m.to.row === dropSquare.row && m.to.col === dropSquare.col)
+      : null;
+
+    clearDragState();
+    state.suppressClickUntil = performance.now() + 200;
+
+    if (move) {
+      playMove(move, true);
+      return;
+    }
+
+    state.selected = null;
+    state.legalTargets = [];
+    renderBoard();
+    updateStatusText();
+  }
+
+  function getSquareFromPoint(clientX, clientY) {
+    const target = document.elementFromPoint(clientX, clientY);
+    const square = target ? target.closest(".square") : null;
+    if (!square) {
+      return null;
+    }
+    return { row: Number(square.dataset.row), col: Number(square.dataset.col) };
+  }
+
+  function clearDragState() {
+    if (state.drag?.ghostEl && state.drag.ghostEl.parentNode) {
+      state.drag.ghostEl.parentNode.removeChild(state.drag.ghostEl);
+    }
+    state.drag = null;
   }
 
   function playMove(move, isHumanMove) {
@@ -804,6 +961,9 @@
         if (piece) {
           const pieceEl = document.createElement("span");
           pieceEl.className = `piece ${piece[0] === "w" ? "piece-white" : "piece-black"}`;
+          if (state.drag && state.drag.from.row === row && state.drag.from.col === col) {
+            pieceEl.classList.add("drag-hidden");
+          }
           pieceEl.textContent = PIECE_UNICODE[piece];
           square.appendChild(pieceEl);
         }

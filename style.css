@@ -206,6 +206,18 @@ button:hover {
   filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.35));
 }
 
+.piece.drag-hidden {
+  opacity: 0;
+}
+
+.drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: translate(-50%, -58%) scale(1.16);
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+}
+
 .piece-white {
   color: #ffffff;
   text-shadow:

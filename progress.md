@@ -26,3 +26,5 @@ Original prompt: help me create a chess board game
 - Reworked difficulty display to Elo-first tiers (e.g., `100 Elo - Very Easy` through `1900 Elo - Master`).
 - Dropdown, status detail, and Elo comparison panel now use consistent Elo-name labels.
 - Added a `Forfeit` button that immediately ends an active game and awards the win to the bot side by forfeit.
+- Added drag-and-drop move support for human turns: pick up piece, see valid targets while dragging, and only commit move on valid drop square.
+- Kept click-to-move behavior as fallback.
