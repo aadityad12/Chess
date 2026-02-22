@@ -2,10 +2,11 @@
   const boardEl = document.getElementById("board");
   const statusEl = document.getElementById("status");
   const detailEl = document.getElementById("detail");
+  const controlsEl = document.querySelector(".controls");
   const sideSelect = document.getElementById("player-side");
   const diffSelect = document.getElementById("difficulty");
   const newGameBtn = document.getElementById("new-game-btn");
-  const forfeitBtn = document.getElementById("forfeit-btn");
+  let forfeitBtn = document.getElementById("forfeit-btn");
   const difficultyInfoEl = document.getElementById("difficulty-info");
   const eloComparisonEl = document.getElementById("elo-comparison");
 
@@ -88,6 +89,7 @@
   let rafLastTs = null;
 
   setupDifficultySelect();
+  ensureForfeitButton();
   renderDifficultyComparison();
   wireEvents();
   resetToIdle();
@@ -129,6 +131,19 @@
         toggleFullscreen();
       }
     });
+  }
+
+  function ensureForfeitButton() {
+    if (forfeitBtn || !controlsEl) {
+      return;
+    }
+
+    const btn = document.createElement("button");
+    btn.id = "forfeit-btn";
+    btn.type = "button";
+    btn.textContent = "Forfeit";
+    controlsEl.appendChild(btn);
+    forfeitBtn = btn;
   }
 
   function startNewGame() {
