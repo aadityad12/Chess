@@ -86,6 +86,10 @@ button:hover {
   transform: translateY(-1px);
 }
 
+#forfeit-btn {
+  background: #2f2f2f;
+}
+
 .status-wrap {
   margin-top: 0.85rem;
   display: grid;

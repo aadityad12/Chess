@@ -5,6 +5,7 @@
   const sideSelect = document.getElementById("player-side");
   const diffSelect = document.getElementById("difficulty");
   const newGameBtn = document.getElementById("new-game-btn");
+  const forfeitBtn = document.getElementById("forfeit-btn");
   const difficultyInfoEl = document.getElementById("difficulty-info");
   const eloComparisonEl = document.getElementById("elo-comparison");
 
@@ -106,6 +107,9 @@
 
   function wireEvents() {
     newGameBtn.addEventListener("click", startNewGame);
+    if (forfeitBtn) {
+      forfeitBtn.addEventListener("click", forfeitGame);
+    }
     diffSelect.addEventListener("change", () => {
       state.difficulty = Number(diffSelect.value);
       updateDifficultyInfo();
@@ -168,6 +172,9 @@
   }
 
   function renderDifficultyComparison() {
+    if (!eloComparisonEl) {
+      return;
+    }
     eloComparisonEl.replaceChildren();
     DIFFICULTY.forEach((level) => {
       const item = document.createElement("li");
@@ -177,8 +184,25 @@
   }
 
   function updateDifficultyInfo() {
+    if (!difficultyInfoEl) {
+      return;
+    }
     const level = DIFFICULTY[Math.max(0, Math.min(9, state.difficulty - 1))];
     difficultyInfoEl.textContent = `Selected: ${level.elo} Elo - ${level.label}`;
+  }
+
+  function forfeitGame() {
+    if (!state.hasStarted || state.gameOver) {
+      return;
+    }
+    state.selected = null;
+    state.legalTargets = [];
+    state.pendingBotAt = null;
+    state.gameOver = true;
+    state.message = `${state.botSide === "w" ? "White" : "Black"} wins by forfeit.`;
+    state.detail = "You forfeited. Press New Game for a rematch.";
+    renderBoard();
+    updateStatusText();
   }
 
   function createInitialPosition() {

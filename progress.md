@@ -25,3 +25,4 @@ Original prompt: help me create a chess board game
 - Updated README run path to start server from `chess-game/`.
 - Reworked difficulty display to Elo-first tiers (e.g., `100 Elo - Very Easy` through `1900 Elo - Master`).
 - Dropdown, status detail, and Elo comparison panel now use consistent Elo-name labels.
+- Added a `Forfeit` button that immediately ends an active game and awards the win to the bot side by forfeit.
