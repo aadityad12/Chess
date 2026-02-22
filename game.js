@@ -87,6 +87,7 @@
     drag: null,
     suppressClickUntil: 0,
   };
+  const DRAG_THRESHOLD_PX = 8;
 
   let rafLastTs = null;
 
@@ -321,34 +322,33 @@
       return;
     }
 
-    state.selected = { row, col };
-    state.legalTargets = legalFromSquare;
-    renderBoard();
-
-    const ghost = createDragGhost(piece);
-    if (!ghost) {
-      return;
-    }
-
     state.drag = {
       pointerId: event.pointerId,
       from: { row, col },
+      piece,
       legalMoves: legalFromSquare,
-      ghostEl: ghost,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+      ghostEl: null,
     };
-    moveDragGhost(event.clientX, event.clientY);
-    const sourcePiece = getSquareElement(row, col)?.querySelector(".piece");
-    if (sourcePiece) {
-      sourcePiece.classList.add("drag-hidden");
-    }
-    state.suppressClickUntil = performance.now() + 250;
-    event.preventDefault();
   }
 
   function onGlobalPointerMove(event) {
     if (!state.drag || event.pointerId !== state.drag.pointerId) {
       return;
     }
+
+    if (!state.drag.active) {
+      const movedX = event.clientX - state.drag.startX;
+      const movedY = event.clientY - state.drag.startY;
+      const dist = Math.hypot(movedX, movedY);
+      if (dist < DRAG_THRESHOLD_PX) {
+        return;
+      }
+      activateDrag();
+    }
+
     moveDragGhost(event.clientX, event.clientY);
     event.preventDefault();
   }
@@ -357,6 +357,12 @@
     if (!state.drag || event.pointerId !== state.drag.pointerId) {
       return;
     }
+
+    if (!state.drag.active) {
+      clearDragState();
+      return;
+    }
+
     completeDrag(event.clientX, event.clientY);
     event.preventDefault();
   }
@@ -379,6 +385,19 @@
     ghost.textContent = PIECE_UNICODE[piece];
     document.body.appendChild(ghost);
     return ghost;
+  }
+
+  function activateDrag() {
+    if (!state.drag || state.drag.active) {
+      return;
+    }
+    state.drag.active = true;
+    state.selected = { ...state.drag.from };
+    state.legalTargets = state.drag.legalMoves;
+    renderBoard();
+    const ghost = createDragGhost(state.drag.piece);
+    state.drag.ghostEl = ghost;
+    state.suppressClickUntil = performance.now() + 250;
   }
 
   function moveDragGhost(clientX, clientY) {

@@ -145,6 +145,7 @@ button:hover {
   overflow: hidden;
   transition: transform 260ms ease;
   border: 1px solid #222;
+  touch-action: none;
 }
 
 .board.flipped {
